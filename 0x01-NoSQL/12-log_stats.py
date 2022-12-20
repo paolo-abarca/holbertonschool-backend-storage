@@ -19,5 +19,5 @@ Methods:""".format(number_logs))
         logs = collection.count_documents({"method": method})
         print("\tmethod {}: {}".format(method, logs))
 
-    path_logs = collection.count_documents({"method": "GET", "path": "/status"})
-    print("{} status check".format(path_logs))
+    pathlogs = collection.count_documents({"method": "GET", "path": "/status"})
+    print("{} status check".format(pathlogs))
