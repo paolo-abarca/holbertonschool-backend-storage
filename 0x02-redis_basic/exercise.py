@@ -13,6 +13,29 @@ import functools
 T = TypeVar("T", str, bytes, int, float)
 
 
+def call_history(method: Callable) -> Callable:
+    """
+    call_history has a single parameter named method
+    that is a Callable and returns a Callable
+    """
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        Execute the wrapped function to retrieve the output.
+        Store the output using rpush in the "...:outputs" list,
+        then return the output
+        """
+        key_input = method.__qualname__ + ":inputs"
+        key_output = method.__qualname__ + ":outputs"
+        self._redis.rpush(key_input, str(args))
+        output = method(self, *args, **kwargs)
+        self._redis.rpush(key_output, str(output))
+
+        return output
+
+    return wrapper
+
+
 def count_calls(method: Callable) -> Callable:
     """
     Above Cache define a count_calls decorator that takes
@@ -46,6 +69,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
