@@ -6,7 +6,10 @@ of the Redis client as a private variable named _redis
 """
 import redis
 import uuid
-from typing import Union
+from typing import Union, Callable, TypeVar
+
+
+T = TypeVar("T", str, bytes, int, float)
 
 
 class Cache:
@@ -32,3 +35,34 @@ class Cache:
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
+
+    def get(self, key: str, fn:
+            Callable[[bytes], T] = None) -> Union[str, bytes, int, float]:
+        """
+        method that take a key string argument and an optional
+        Callable argument named fn. This callable will be used
+        to convert the data back to the desired format
+        """
+        data = self._redis.get(key)
+
+        if data is None:
+            return None
+
+        if fn is not None:
+            return fn(data)
+
+        return data
+
+    def get_str(self, key: str) -> str:
+        """
+         that will automatically parametrize Cache.get
+         with the correct conversion function (str)
+        """
+        return self.get(key, lambda i: i.decode("utf-8"))
+
+    def get_int(self, key: str) -> int:
+        """
+         that will automatically parametrize Cache.get
+         with the correct conversion function (int)
+        """
+        return self.get(key, int)
