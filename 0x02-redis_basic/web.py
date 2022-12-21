@@ -13,6 +13,11 @@ r = redis.Redis()
 
 
 def get_page(url: str) -> str:
+    """
+    Inside get_page track how many times a particular URL was
+    accessed in the key count:{url} and cache the result with
+    an expiration time of 10 seconds
+    """
     html = r.get(url)
     if html:
         return html.decode('utf-8')
