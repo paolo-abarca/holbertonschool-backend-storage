@@ -7,24 +7,20 @@ content of a particular URL and returns it
 """
 import requests
 import redis
-redis = redis.Redis()
+
+
+r = redis.Redis()
 
 
 def get_page(url: str) -> str:
-    """
-    Start in a new file named web.py and do not reuse
-    the code written in exercise.py
-    """
-    count_key = "count:{url}"
-    redis.incr(count_key)
-
-    result = redis.get(url)
-    if result is not None:
-        return result
-
-    result = requests.get(url).text
-    redis.set(url, result, ex=10)
-    return result
+    html = r.get(url)
+    if html:
+        return html.decode('utf-8')
+    else:
+        response = requests.get(url)
+        html = response.text
+        r.set(url, html, ex=10)
+        return html
 
 
 if __name__ == "__main__":
