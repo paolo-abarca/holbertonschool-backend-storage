@@ -112,3 +112,21 @@ class Cache:
          with the correct conversion function (int)
         """
         return self.get(key, int)
+
+
+def replay(method: Callable):
+    """
+    In this tasks, we will implement a replay function to
+    display the history of calls of a particular function
+    """
+    key_input = method.__qualname__ + ":inputs"
+    key_output = method.__qualname__ + ":outputs"
+
+    inputs = method.__self__._redis.lrange(key_input, 0, -1)
+    outputs = method.__self__._redis.lrange(key_output, 0, -1)
+
+    print("{} was called {} times:".format(method.__qualname__, len(inputs)))
+    for inp, out in zip(inputs, outputs):
+        i = inp.decode("utf-8")
+        o = out.decode("utf-8")
+        print("{}(*{}) -> {}".format(method.__qualname__, i, o))
